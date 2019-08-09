@@ -1,0 +1,129 @@
+## ==================================================================================
+##                        Loading and preprocessing the data
+
+# Unzip the file.
+unzip("./activity.zip")
+
+# Load the data file into a data frame.
+raw_data <- read.csv("./activity.csv")
+
+# Remove the NA values.
+activity_data <- raw_data[complete.cases(raw_data),]
+
+# Take a look at activity_data.
+head(activity_data)
+## ==================================================================================
+
+
+
+## ==================================================================================
+##              What is mean total number of steps taken per day?
+
+# Calculate the total number of steps per day.
+step_per_day <- aggregate(steps ~ date, activity_data, sum)
+
+# Take a look at step_per_day.
+head(step_per_day)
+
+# Plot a histogram.
+hist(step_per_day$steps, main = "Histogram of the Total Number of Steps Per Day", 
+     xlab = "Steps Per Day")
+
+# Calculate the mean.
+round(mean(step_per_day$steps))
+
+# Calculate the median.
+median(step_per_day$steps)
+## ==================================================================================
+
+
+
+## ==================================================================================
+##                    What is the average daily activity pattern?
+
+# Calculate the average number of steps per interval.
+step_by_interval <- aggregate(steps ~ interval, activity_data, mean)
+
+# Take a look at step_by_inverval.
+head(step_by_interval)
+
+# Make a time series plot of the 5-minute interval (x-axis) and the average number of 
+# steps taken (y-axis).
+plot(step_by_interval$interval, step_by_interval$steps, xlab = "5-minute Interval Index",
+     ylab = "Average Number of Steps", type = "l")
+
+# Find the 5-minute interval that contains the maximum.
+step_by_interval$interval[which.max(step_by_interval$steps)]
+
+# Find the maximum number of steps in that interval.
+round(step_by_interval$steps[which.max(step_by_interval$steps)])
+## ==================================================================================
+
+
+
+## ==================================================================================
+##                              Imputing missing values
+
+# Calculate and report the total number of missing values in the dataset.
+na_rows <-is.na(raw_data$steps)
+sum(na_rows)
+
+# Fill in all of the missing values in the dataset using the the mean for that 
+# 5-minute interval, etc.
+filled_data <- split(raw_data, raw_data$interval)
+
+for (i in 1:288) {
+  filled_data[[i]]$steps[is.na(filled_data[[i]]$steps)]=step_by_interval$steps[i]
+}
+
+library(plyr)
+new_data <- ldply(filled_data)[,-1]
+
+# Make a histogram of the total number of steps taken each day.
+new_step_per_day <- aggregate(steps ~ date, new_data, sum)
+hist(new_step_per_day$steps, main = "Histogram of the Total Number of Steps Per Day",
+     xlab = "Steps Per Day")
+
+# Calculate the mean.
+round(mean(new_step_per_day$steps))
+
+# Calculate the median.
+median(new_step_per_day$steps)
+## ==================================================================================
+
+
+
+## ==================================================================================
+##    Are there differences in activity patterns between weekdays and weekends?
+
+# Create a function to check day in week.
+checkDayInWeek <- function(date) {
+  d <- weekdays(as.Date(date, '%Y-%m-%d'))
+  if  (!(d == 'Saturday' || d == 'Sunday')) {
+    return('Weekday') 
+  } else {
+    return('Weekend')
+  }
+}
+
+# Create a new factor variable  with two levels – “weekday” and “weekend”.
+new_data$day <- as.factor(sapply(new_data$date, checkDayInWeek))
+
+# Take a look at new_data.
+head(new_data)
+
+## Calculate the average number of steps per interval by day type.
+steps_by_day_type <- aggregate(steps ~ interval+day, new_data, mean)
+
+# Make a panel plot containing a time series plotof the 5-minute interval (x-axis)
+# and the average number of steps taken, averaged across all weekday days or 
+# weekend days (y-axis). 
+library(ggplot2)
+panel_plot <- ggplot(steps_by_day_type, aes(interval, steps)) +
+  geom_line(stat = "identity", aes(colour = day)) +
+  theme_gray() +
+  facet_grid(day ~ ., scales="fixed", space="fixed") +
+  labs(x="5-minute Interval Indexl", y=expression("Average No. of Steps")) +
+  ggtitle("No. of Steps Per Interval by Day Type")
+print(panel_plot)
+## ==================================================================================
