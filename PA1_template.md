@@ -60,8 +60,7 @@ head(step_per_day)
 # Plot a histogram.
 hist(step_per_day$steps, main = "Histogram of the Total Number of Steps Per Day", xlab = "Steps Per Day")
 ```
-
-![](PA1_template_files/figure-html/unnamed-chunk-2-1.png)<!-- -->
+![Hist1](figure/hist1.png)
 
 ```r
 # Calculate the mean.
@@ -110,7 +109,7 @@ head(step_by_interval)
 plot(step_by_interval$interval, step_by_interval$steps, xlab = "5-minute Interval Index", ylab = "Average Number of Steps", type = "l")
 ```
 
-![](PA1_template_files/figure-html/unnamed-chunk-3-1.png)<!-- -->
+![plot1](figure/timeSeries.png)
 
 ```r
 # Find the 5-minute interval that contains the maximum.
@@ -161,8 +160,7 @@ new_data <- ldply(filled_data)[,-1]
 new_step_per_day <- aggregate(steps ~ date, new_data, sum)
 hist(new_step_per_day$steps, main = "Histogram of the Total Number of Steps Per Day", xlab = "Steps Per Day")
 ```
-
-![](PA1_template_files/figure-html/unnamed-chunk-4-1.png)<!-- -->
+![Hist2](figure/hist2.png)
 
 ```r
 # Calculate the mean.
@@ -233,4 +231,4 @@ panel_plot <- ggplot(steps_by_day_type, aes(interval, steps)) +
 print(panel_plot)
 ```
 
-![](PA1_template_files/figure-html/unnamed-chunk-5-1.png)<!-- -->
+![Panel Plot](figure/panelPlot.png)
